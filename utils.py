@@ -12,6 +12,9 @@ class tspProblem():
         assert (filepath[-4:] == ".tsp")
     
     def __getMetaData(self, filepath):
+        '''
+        获取总节点数和坐标矩阵
+        '''
         tsp = open(filepath, mode='r')
         #get numberof nodes
         line = tsp.readline()
@@ -36,6 +39,9 @@ class tspProblem():
         self.cordinates = cordinates
     
     def __convertToDistanceMatrix(self):
+        '''
+        计算距离矩阵
+        '''
         # print(self.numOfNodes)
         # print(self.cordinates)
         distanceMatrix = np.zeros((self.numOfNodes, self.numOfNodes))
