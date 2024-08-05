@@ -3,9 +3,13 @@ import numpy as np
 
 class simulatedAnnealing():
     def __init__(self, tspProblem: utils.tspProblem):
+        # problem varibles
         self.tsp = tspProblem
+        # solution varibles
         self.solution = np.zeros(self.tsp.numOfNodes, dtype=int) # store the solution
         self.distance = 0 # store the distance of the solution above
+        self.selectMartix = selectMatrix(self) # use selectMatrix.matrix to get matrix itself
+        # other private varibles, used in the mid-calc parts
         self._recordTable = np.zeros((self.tsp.numOfNodes, 3),dtype=int)#selected,nodes,next
     
     # public funcs
@@ -24,6 +28,10 @@ class simulatedAnnealing():
             current = int(self._recordTable[current,2])
             # print(current)
             self._recordTable[current,0] = 1
+        
+        #finals
+        self.calculateResultandStore()
+        self.selectMartix.convertSolutionToSelectMatrix(self.solution)
     
     def calculateResultandStore(self):
         '''
@@ -52,3 +60,24 @@ class simulatedAnnealing():
                 nodeIndex = i
                 minDistance = self.tsp.distMatrix[current, i]
         return int(nodeIndex)
+    
+class selectMatrix():
+    '''
+    选择矩阵类，用于构造、生成新解等
+    '''
+    def __init__(self, sa: simulatedAnnealing):
+        self.sa = sa
+        self.scale = sa.tsp.numOfNodes
+        self.matrix = np.zeros((self.scale, self.scale), dtype=int)
+    
+    def convertSolutionToSelectMatrix(self, solution):
+        '''
+        转换初始解（数组）到选择矩阵（0-1形式）
+        '''
+        current = solution[0]
+        for i in range(0, self.scale):
+            if i != self.scale-1:
+                self.matrix[solution[i+1],current] = 1
+                current = solution[i+1]
+            else:
+                self.matrix[solution[0], current] = 1
