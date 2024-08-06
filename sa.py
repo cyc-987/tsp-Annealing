@@ -15,8 +15,8 @@ class simulatedAnnealing():
         self.initialTemp = 10000
         self.currentTemp = self.initialTemp
         self.currentIteration = 0
-        self.alpha = 0.997
-        self.minTemp = 1e-12
+        self.alpha = 0.99
+        self.minTemp = 1e-10
         self.maxIteration = 1000000
         # other private varibles, used in the mid-calc parts
         self._recordTable = np.zeros((self.tsp.numOfNodes, 3),dtype=int)#selected,nodes,next
@@ -28,6 +28,7 @@ class simulatedAnnealing():
         生成初始解，目前使用贪心算法
         '''
         #使用贪心算法，每次寻找最近的一个点
+        self._recordTable = np.zeros((self.tsp.numOfNodes, 3),dtype=int)
         current = 0
         self._recordTable[current,0] = 1
         for i in range(0,self.tsp.numOfNodes):
@@ -72,11 +73,13 @@ class simulatedAnnealing():
         '''
         # initialization
         self.initialSolution()
+        initialDist = self.distance
         minDist = self.distance
         minSolution = self.solution
         oldDist = self.distance
         oldSolution = self.solution
         print('start sa')
+        print('initial dist: ', initialDist)
         
         while(self.__checkEndCondition()):
             # generate next solution
@@ -101,7 +104,13 @@ class simulatedAnnealing():
             oldSolution = self.solution
             self.currentTemp *= self.alpha
             self.currentIteration += 1
-            if self.currentIteration % 100 == 0: print(self.currentIteration)
+            if self.currentIteration % 1000 == 0: print(self.currentIteration)
+            
+        # end
+        isgood = self.distance/initialDist
+        print('inital dist: ', initialDist)
+        print('fianl dist', self.distance)
+        print('better than initial?', isgood)
             
 
     #private funcs
