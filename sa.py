@@ -12,10 +12,10 @@ class simulatedAnnealing():
         self.distance = 0 # store the distance of the solution above
         self.selectMartix = selectMatrix(self) # use selectMatrix.matrix to get matrix itself
         # simulated Annealing parameters and varibles
-        self.initialTemp = 10000
+        self.initialTemp = 7000
         self.currentTemp = self.initialTemp
         self.currentIteration = 0
-        self.alpha = 0.99
+        self.alpha = 0.7
         self.minTemp = 1e-10
         self.maxIteration = 1000000
         # other private varibles, used in the mid-calc parts
@@ -109,7 +109,7 @@ class simulatedAnnealing():
         # end
         isgood = self.distance/initialDist
         print('inital dist: ', initialDist)
-        print('fianl dist', self.distance)
+        print('final dist', self.distance)
         print('better than initial?', isgood)
             
 
@@ -134,7 +134,7 @@ class simulatedAnnealing():
 
     def __nextSolution_listInverse(self):
         i = random.randint(0, self.tsp.numOfNodes-2)
-        j = random.randint(i+1, self.tsp.numOfNodes-1)
+        j = random.randint(i+1, min(self.tsp.numOfNodes-1, i+1+int(self.tsp.numOfNodes*0.05)))
         self.solution[i:j] = list(reversed(self.solution[i:j]))
     
     def __accept(self, delta):
