@@ -2,6 +2,8 @@ import utils
 import numpy as np
 import random
 import math
+import visual
+import copy
 
 class simulatedAnnealing():
     def __init__(self, tspProblem: utils.tspProblem):
@@ -12,10 +14,10 @@ class simulatedAnnealing():
         self.distance = 0 # store the distance of the solution above
         self.selectMartix = selectMatrix(self) # use selectMatrix.matrix to get matrix itself
         # simulated Annealing parameters and varibles
-        self.initialTemp = 7000
+        self.initialTemp = 10000
         self.currentTemp = self.initialTemp
         self.currentIteration = 0
-        self.alpha = 0.7
+        self.alpha = 0.9
         self.minTemp = 1e-10
         self.maxIteration = 1000000
         # other private varibles, used in the mid-calc parts
@@ -75,9 +77,14 @@ class simulatedAnnealing():
         self.initialSolution()
         initialDist = self.distance
         minDist = self.distance
-        minSolution = self.solution
+        minSolution = copy.deepcopy(self.solution)
         oldDist = self.distance
-        oldSolution = self.solution
+        oldSolution = copy.deepcopy(self.solution)
+        
+        # visulization init
+        pic = visual.visualization(self.tsp)
+        pic.update(self, 0.5)
+        
         print('start sa')
         print('initial dist: ', initialDist)
         
@@ -89,28 +96,31 @@ class simulatedAnnealing():
             # check
             if self.distance < minDist: # better solution
                 minDist = self.distance
-                minSolution = self.solution
+                minSolution = copy.deepcopy(self.solution)
                 print('accept_good')
+                pic.update(self, 0.5)
             else: # accept at a percentage
                 if self.__accept(self.distance - minDist): # accept
                     minDist = self.distance
-                    minSolution = self.solution 
+                    minSolution = copy.deepcopy(self.solution)
                     # print('accept_try')
                 else: # retreat
                     self.distance = oldDist
-                    self.solution = oldSolution
+                    self.solution = copy.deepcopy(oldSolution)
             # update
             oldDist = self.distance
-            oldSolution = self.solution
+            oldSolution = copy.deepcopy(self.solution)
             self.currentTemp *= self.alpha
             self.currentIteration += 1
             if self.currentIteration % 1000 == 0: print(self.currentIteration)
+            pic.update(self, 0.01)       
             
         # end
         isgood = self.distance/initialDist
         print('inital dist: ', initialDist)
         print('final dist', self.distance)
         print('better than initial?', isgood)
+        pic.end()
             
 
     #private funcs
@@ -134,7 +144,8 @@ class simulatedAnnealing():
 
     def __nextSolution_listInverse(self):
         i = random.randint(0, self.tsp.numOfNodes-2)
-        j = random.randint(i+1, min(self.tsp.numOfNodes-1, i+1+int(self.tsp.numOfNodes*0.05)))
+        j = random.randint(i+1, min(self.tsp.numOfNodes-1, i+1+int(self.tsp.numOfNodes*0.1)))
+        # j = random.randint(i+1, self.tsp.numOfNodes-1)
         self.solution[i:j] = list(reversed(self.solution[i:j]))
     
     def __accept(self, delta):
