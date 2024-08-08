@@ -113,7 +113,7 @@ class simulatedAnnealing():
                 if self.enableVisual:
                     pic.update(self, self.refreshTime)
             else: # accept at a percentage
-                if self.__accept(self.distance - minDist): # accept
+                if self.distance > minDist and self.__accept(self.distance - minDist): # accept
                     minDist = self.distance
                     minSolution = copy.deepcopy(self.solution)
                     print('accept_try')
@@ -161,8 +161,8 @@ class simulatedAnnealing():
 
     def __nextSolution_listInverse(self):
         i = random.randint(0, self.tsp.numOfNodes-2)
-        j = random.randint(i+1, min(self.tsp.numOfNodes-1, i+1+int(self.tsp.numOfNodes*0.1)))
-        # j = random.randint(i+1, self.tsp.numOfNodes-1)
+        # j = random.randint(i+1, min(self.tsp.numOfNodes-1, i+1+int(self.tsp.numOfNodes*0.1)))
+        j = random.randint(i+1, self.tsp.numOfNodes-1)
         self.solution[i:j] = list(reversed(self.solution[i:j]))
     
     def __accept(self, delta):
