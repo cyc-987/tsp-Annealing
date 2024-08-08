@@ -6,7 +6,15 @@ import visual
 import copy
 
 class simulatedAnnealing():
-    def __init__(self, tspProblem: utils.tspProblem):
+    def __init__(self, 
+                 tspProblem: utils.tspProblem, # tsp对象，在utils中
+                 initialTemp: float=-1, # 设定初始温度，默认为节点数开方
+                 alpha: float=0.995, # 温度降低系数，在01之间
+                 minTemp: float=1e-8, # 终止温度
+                 maxIteration: int=100000, # 最大迭代次数限制
+                 enableVisual: bool=True, # 是否启用可视化，默认启用
+                 refreshTime: float=0.05 # 如果启用可视化，则控制路径刷新速度，此选项同时会控制迭代速度
+                 ):
         # problem varibles
         self.tsp = tspProblem
         # solution varibles
@@ -14,12 +22,15 @@ class simulatedAnnealing():
         self.distance = 0 # store the distance of the solution above
         self.selectMartix = selectMatrix(self) # use selectMatrix.matrix to get matrix itself
         # simulated Annealing parameters and varibles
-        self.initialTemp = 10000
+        self.initialTemp = math.sqrt(self.tsp.numOfNodes) if initialTemp == -1 else initialTemp
         self.currentTemp = self.initialTemp
         self.currentIteration = 0
-        self.alpha = 0.9
-        self.minTemp = 1e-10
-        self.maxIteration = 1000000
+        self.alpha = alpha
+        self.minTemp = minTemp
+        self.maxIteration = maxIteration
+        # visulization control
+        self.enableVisual = enableVisual
+        self.refreshTime = refreshTime
         # other private varibles, used in the mid-calc parts
         self._recordTable = np.zeros((self.tsp.numOfNodes, 3),dtype=int)#selected,nodes,next
         random.seed()
@@ -82,8 +93,9 @@ class simulatedAnnealing():
         oldSolution = copy.deepcopy(self.solution)
         
         # visulization init
-        pic = visual.visualization(self.tsp)
-        pic.update(self, 0.5)
+        if self.enableVisual:
+            pic = visual.visualization(self.tsp)
+            pic.update(self, 0.5)
         
         print('start sa')
         print('initial dist: ', initialDist)
@@ -98,12 +110,15 @@ class simulatedAnnealing():
                 minDist = self.distance
                 minSolution = copy.deepcopy(self.solution)
                 print('accept_good')
-                pic.update(self, 0.5)
+                if self.enableVisual:
+                    pic.update(self, self.refreshTime)
             else: # accept at a percentage
                 if self.__accept(self.distance - minDist): # accept
                     minDist = self.distance
                     minSolution = copy.deepcopy(self.solution)
-                    # print('accept_try')
+                    print('accept_try')
+                    if self.enableVisual:
+                        pic.update(self, self.refreshTime)
                 else: # retreat
                     self.distance = oldDist
                     self.solution = copy.deepcopy(oldSolution)
@@ -113,14 +128,16 @@ class simulatedAnnealing():
             self.currentTemp *= self.alpha
             self.currentIteration += 1
             if self.currentIteration % 1000 == 0: print(self.currentIteration)
-            pic.update(self, 0.01)       
+            # if self.enableVisual:
+            #     pic.update(self, self.refreshTime)       
             
         # end
         isgood = self.distance/initialDist
         print('inital dist: ', initialDist)
         print('final dist', self.distance)
         print('better than initial?', isgood)
-        pic.end()
+        if self.enableVisual:
+            pic.end()
             
 
     #private funcs
